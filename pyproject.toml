@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = ">3.8"
 Django = "4.*"
+django-model-utils = "4.*"
 
 [tool.poetry.dev-dependencies]
 django-extensions = "3.*"
@@ -20,7 +21,7 @@ django-coverage-plugin = "3.*"
 black = "23.*"
 mypy = "1.*"
 mypy-extensions = "1.*"
-pylint = "3.*"
+pylint = "2.*"
 pylint-django = "2.*"
 ptpython = "3.*"
 

@@ -288,6 +288,20 @@ files = [
 Django = ">=3.2"
 
 [[package]]
+name = "django-model-utils"
+version = "4.3.1"
+description = "Django model mixins and utilities"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django-model-utils-4.3.1.tar.gz", hash = "sha256:2e2e4f13e4f14613134a9777db7ad4265f59a1d8f1384107bcaa3028fe3c87c1"},
+    {file = "django_model_utils-4.3.1-py3-none-any.whl", hash = "sha256:8c0b0177bab909a8635b602d960daa67e80607aa5469217857271a60726d7a4b"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+
+[[package]]
 name = "exceptiongroup"
 version = "1.1.2"
 description = "Backport of PEP 654 (exception groups)"
@@ -625,17 +639,17 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pylint"
-version = "3.0.0a6"
+version = "2.17.4"
 description = "python code static checker"
 optional = false
 python-versions = ">=3.7.2"
 files = [
-    {file = "pylint-3.0.0a6-py3-none-any.whl", hash = "sha256:f0b0857f6fba90527a30f39937a9f66858b59c5dcbb8c062821ad665637bb742"},
-    {file = "pylint-3.0.0a6.tar.gz", hash = "sha256:eb035800b371862e783f27067b3fc00c6b726880cacfed101b619f366bb813f6"},
+    {file = "pylint-2.17.4-py3-none-any.whl", hash = "sha256:7a1145fb08c251bdb5cca11739722ce64a63db479283d10ce718b2460e54123c"},
+    {file = "pylint-2.17.4.tar.gz", hash = "sha256:5dcf1d9e19f41f38e4e85d10f511e5b9c35e1aa74251bf95cdd8cb23584e2db1"},
 ]
 
 [package.dependencies]
-astroid = ">=2.15.1,<=2.17.0-dev0"
+astroid = ">=2.15.4,<=2.17.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
     {version = ">=0.2", markers = "python_version < \"3.11\""},
@@ -654,21 +668,21 @@ testutils = ["gitpython (>3)"]
 
 [[package]]
 name = "pylint-django"
-version = "2.5.2"
+version = "2.5.3"
 description = "A Pylint plugin to help Pylint understand the Django web framework"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pylint-django-2.5.2.tar.gz", hash = "sha256:1933d82b4a92538a3b12aef91adfd7d866befd051d7a02d6245b0f965587d97c"},
-    {file = "pylint_django-2.5.2-py3-none-any.whl", hash = "sha256:286dce8a31bc8ed5a523e8d8742b5a0e083b87f5f140ea4cde9aad612c03bd2d"},
+    {file = "pylint-django-2.5.3.tar.gz", hash = "sha256:0ac090d106c62fe33782a1d01bda1610b761bb1c9bf5035ced9d5f23a13d8591"},
+    {file = "pylint_django-2.5.3-py3-none-any.whl", hash = "sha256:56b12b6adf56d548412445bd35483034394a1a94901c3f8571980a13882299d5"},
 ]
 
 [package.dependencies]
-pylint = ">=2.0"
+pylint = ">=2.0,<3"
 pylint-plugin-utils = ">=0.7"
 
 [package.extras]
-for-tests = ["coverage", "django-tables2", "django-tastypie", "factory-boy", "pytest", "wheel"]
+for-tests = ["coverage", "django-tables2", "django-tastypie", "factory-boy", "pylint (>=2.13)", "pytest", "wheel"]
 with-django = ["Django"]
 
 [[package]]
@@ -935,4 +949,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">3.8"
-content-hash = "9958ea4f7c6c34ce471706e41661ab309d22e00b7ad9238b3b38facbc9b923fe"
+content-hash = "e54068fdd4eb1f818e3031ab7ba80ccb64656060da76fc585209f42797a4059f"
