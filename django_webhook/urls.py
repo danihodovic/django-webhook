@@ -1,5 +1,5 @@
-from django.urls import path
-
-app_name = 'webhooks'
-
-urlpatterns = []
+# from django.urls import path
+#
+# app_name = "django_webhook"
+#
+# urlpatterns = []

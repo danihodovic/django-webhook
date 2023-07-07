@@ -20,9 +20,11 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = []  # type: ignore
+THIRD_PARTY_APPS = [
+    "django_extensions",
+]  # type: ignore
 
-LOCAL_APPS = ["webhooks", "tests"]
+LOCAL_APPS = ["django_webhook", "tests"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -56,3 +58,10 @@ SITE_ID = 1
 STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(__file__).parent / "media"
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_STORE_EAGER_RESULT = True
+
+DJANGO_WEBHOOK = dict(MODELS=["tests.User", "tests.Country"])
