@@ -2,11 +2,24 @@ from django.apps import AppConfig
 
 
 class WebhooksConfig(AppConfig):
-    name = 'webhooks'
+    name = "django_webhook"
 
     def ready(self):
-        try:
-            # pylint: disable=unused-import
-            import webhooks.signals
-        except ImportError:
-            pass
+        from django.conf import settings
+
+        from .settings import defaults
+
+        d = getattr(settings, "DJANGO_WEBHOOK", {})
+        for k, v in defaults.items():
+            if k not in d:
+                d[k] = v
+
+        settings.DJANGO_WEBHOOK = d
+
+        # pylint: disable=unused-import
+        import django_webhook.checks
+        from django_webhook.signals import connect_signals
+        from django_webhook.models import populate_topics_from_settings
+
+        connect_signals()
+        populate_topics_from_settings()

@@ -6,13 +6,15 @@ authors = ["Dani Hodovic <you@example.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">3.8"
+python = "^3.8"
 Django = "4.*"
+django-model-utils = "4.*"
+celery = "5.*"
+requests = "2.*"
 
 [tool.poetry.dev-dependencies]
 django-extensions = "3.*"
 pytest = "7.*"
-pytest-clarity = "1.*"
 pytest-cov = "4.*"
 pytest-django = "4.*"
 coverage = "7.*"
@@ -20,9 +22,18 @@ django-coverage-plugin = "3.*"
 black = "23.*"
 mypy = "1.*"
 mypy-extensions = "1.*"
-pylint = "3.*"
+pylint = "2.*"
 pylint-django = "2.*"
 ptpython = "3.*"
+
+[tool.poetry.group.dev.dependencies]
+factory-boy = "^3.2.1"
+pudb = "^2022.1.3"
+responses = "^0.23.1"
+pytest-celery = "^0.0.0"
+freezegun = "^1.2.2"
+pytest-mock = "^3.11.1"
+werkzeug = "^2.3.6"
 
 [build-system]
 requires = ["poetry>=0.12"]
