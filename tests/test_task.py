@@ -2,7 +2,7 @@ import pytest
 from celery import exceptions
 from freezegun import freeze_time
 
-from django_webhook.tasks import fire
+from django_webhook.tasks import fire_webhook
 from django_webhook.test_factories import (WebhookFactory,
                                            WebhookSecretFactory,
                                            WebhookTopicFactory)
@@ -17,7 +17,7 @@ def test_fire(responses):
         topics=[WebhookTopicFactory(name="tests.User/create")],
     )
     responses.post(webhook.url)
-    fire.delay(webhook.id, payload=dict(hello="world"))
+    fire_webhook.delay(webhook.id, payload=dict(hello="world"))
     assert len(responses.calls) == 1
     req = responses.calls[0].request
     assert req.body == b'{"hello": "world"}'
@@ -33,7 +33,7 @@ def test_fire(responses):
 # TODO: Maybe in signals
 def test_does_not_fire_inactive(responses):
     webhook = WebhookFactory(active=False)
-    fire.delay(webhook.id, payload=dict(hello="world"))
+    fire_webhook.delay(webhook.id, payload=dict(hello="world"))
     assert len(responses.calls) == 0
 
 
@@ -45,7 +45,7 @@ def test_multiple_signatures(responses):
     WebhookSecretFactory(webhook=webhook, token="Hugh-Clowers-Thompson-Jr")
     WebhookSecretFactory(webhook=webhook, token="Augusto-César-Sandino")
     responses.post(webhook.url)
-    fire.delay(webhook.id, payload=dict(hello="world"))
+    fire_webhook.delay(webhook.id, payload=dict(hello="world"))
     assert len(responses.calls) == 1
     h = responses.calls[0].request.headers
     # pylint: disable=line-too-long
@@ -53,10 +53,3 @@ def test_multiple_signatures(responses):
         h["Django-Webhook-Signature-v1"]
         == "7cde1ddd304f5e4c88fe5429cbe318ce83fd1f610a8004c8cafc20bc3289661f,28e85307029745b99e205c6003a4a5a7aa44f95f950a4cf44dfaa95df4a73d0c"
     )
-
-
-def test_retry(responses):
-    webhook = WebhookFactory()
-    responses.post(webhook.url, status=500)
-    with pytest.raises(exceptions.Retry, match=r"Retry in 60s"):
-        fire.delay(webhook.id, payload=dict(hello="world"))

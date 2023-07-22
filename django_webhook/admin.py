@@ -1,7 +1,9 @@
 from django.contrib import admin
-from .forms import WebhookForm
 from django.contrib.admin import TabularInline
+
 from django_webhook.models import Webhook, WebhookSecret, WebhookTopic
+
+from .forms import WebhookForm
 
 
 class WebhookSecretInline(TabularInline):

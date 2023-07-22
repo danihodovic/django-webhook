@@ -9,7 +9,7 @@ from django.forms import model_to_dict
 
 from django_webhook.models import Webhook
 
-from .tasks import fire
+from .tasks import fire_webhook
 from .util import cache
 
 CREATE = "create"
@@ -39,7 +39,7 @@ class SignalListener:
                 action_type = DELETE
 
         topic = f"{self.model_label}/{action_type}"
-        webhook_ids = _webhook_ids_for_topic(topic)
+        webhook_ids = _find_webhooks(topic)
 
         for id, uuid in webhook_ids:
             payload = dict(
@@ -48,7 +48,7 @@ class SignalListener:
                 object_type=self.model_label,
                 webhook_uuid=str(uuid),
             )
-            fire.delay(id, payload)
+            fire_webhook.delay(id, payload)
 
     def connect(self):
         self.signal.connect(
@@ -102,11 +102,24 @@ def _active_models():
     return model_classes
 
 
+def _find_webhooks(topic: str):
+    """
+    In tests and for smaller setups we don't want to cache the query.
+    """
+    if settings.DJANGO_WEBHOOK["USE_CACHE"]:
+        return _query_webhooks_cached(topic)
+    return _query_webhooks(topic)
+
+
 @cache(ttl=timedelta(minutes=1))
-def _webhook_ids_for_topic(topic: str):
+def _query_webhooks_cached(topic: str):
     """
     Cache the calls to the database so we're not polling the db anytime a signal is triggered.
     """
+    return _query_webhooks(topic)
+
+
+def _query_webhooks(topic: str):
     return Webhook.objects.filter(active=True, topics__name=topic).values_list(
         "id", "uuid"
     )

@@ -18,8 +18,8 @@ class WebhooksConfig(AppConfig):
 
         # pylint: disable=unused-import
         import django_webhook.checks
-        from django_webhook.signals import connect_signals
         from django_webhook.models import populate_topics_from_settings
+        from django_webhook.signals import connect_signals
 
         connect_signals()
         populate_topics_from_settings()
