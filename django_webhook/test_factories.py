@@ -1,7 +1,8 @@
 import factory
 from factory import SubFactory
 
-from django_webhook.models import Webhook, WebhookSecret, WebhookTopic
+from django_webhook.models import (Webhook, WebhookEvent, WebhookSecret,
+                                   WebhookTopic, states)
 
 
 class WebhookSecretFactory(factory.django.DjangoModelFactory):
@@ -35,3 +36,15 @@ class WebhookFactory(factory.django.DjangoModelFactory):
 class WebhookTopicFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = WebhookTopic
+
+
+class WebhookEventFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = WebhookEvent
+
+    webhook = factory.SubFactory(WebhookFactory)
+    object = factory.Faker("pydict")
+    object_type = factory.Faker("pystr")
+    status = factory.Faker("random_element", elements=states.ALL_STATES)
+    url = factory.Faker("url")
+    topic = factory.Faker("pystr")

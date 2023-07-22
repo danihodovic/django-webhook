@@ -1,8 +1,10 @@
 import uuid
 
+from celery import states
 from django.conf import settings
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from model_utils.fields import AutoCreatedField
 from model_utils.models import TimeStampedModel
@@ -10,6 +12,12 @@ from model_utils.models import TimeStampedModel
 from .validators import validate_topic_model
 
 topic_regex = r"\w+\.\w+\/[create|update|delete]"
+
+STATES = [
+    (states.PENDING, states.PENDING),
+    (states.FAILURE, states.FAILURE),
+    (states.SUCCESS, states.SUCCESS),
+]
 
 
 # Use auto update fields instead of model_utils
@@ -59,10 +67,37 @@ class WebhookSecret(models.Model):
     created = AutoCreatedField()
 
 
+class WebhookEvent(models.Model):
+    webhook = models.ForeignKey(
+        Webhook,
+        on_delete=models.SET_NULL,
+        null=True,
+        editable=False,
+        related_name="events",
+        related_query_name="event",
+    )
+    object = models.JSONField(
+        max_length=1000,
+        encoder=DjangoJSONEncoder,
+        editable=False,
+    )
+    object_type = models.CharField(max_length=50, null=True, editable=False)
+    status = models.CharField(
+        max_length=40,
+        default=states.PENDING,
+        choices=STATES,
+        editable=False,
+    )
+    created = AutoCreatedField()
+    url = models.URLField(editable=False)
+    topic = models.CharField(max_length=250, null=True, editable=False)
+
+
 def populate_topics_from_settings():
     # pylint: disable=import-outside-toplevel
-    from django_webhook.signals import CREATE, UPDATE, DELETE
-    from django.db.utils import OperationalError, IntegrityError
+    from django.db.utils import IntegrityError, OperationalError
+
+    from django_webhook.signals import CREATE, DELETE, UPDATE
 
     try:
         Webhook.objects.count()
@@ -72,20 +107,16 @@ def populate_topics_from_settings():
         raise ex
 
     webhook_settings = getattr(settings, "DJANGO_WEBHOOK", {})
-    models = webhook_settings.get("MODELS")
-    if not models:
+    enabled_models = webhook_settings.get("MODELS")
+    if not enabled_models:
         return
 
-    for model in settings.DJANGO_WEBHOOK["MODELS"]:
+    for model in enabled_models:
         allowed_topics = [
             f"{model}/{CREATE}",
             f"{model}/{UPDATE}",
             f"{model}/{DELETE}",
         ]
         for topic in allowed_topics:
-            try:
+            if not WebhookTopic.objects.filter(name=topic).exists():
                 WebhookTopic.objects.create(name=topic)
-            except IntegrityError as ex:
-                if "UNIQUE constraint failed" in ex.args[0]:
-                    continue
-                raise ex

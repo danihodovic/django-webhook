@@ -4,15 +4,14 @@ import json
 from datetime import datetime, timedelta
 
 import pytest
+from django.test import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
 from pytest_django.asserts import assertNumQueries
 
-from django_webhook.test_factories import (
-    WebhookFactory,
-    WebhookSecretFactory,
-    WebhookTopicFactory,
-)
+from django_webhook.test_factories import (WebhookFactory,
+                                           WebhookSecretFactory,
+                                           WebhookTopicFactory)
 from tests.models import Country, User
 
 pytestmark = pytest.mark.django_db
@@ -155,9 +154,15 @@ def test_does_not_fire_inactive_webhooks(responses):
     assert len(responses.calls) == 0
 
 
+@override_settings(
+    DJANGO_WEBHOOK=dict(
+        MODELS=["tests.Country"],
+        USE_CACHE=True,
+    )
+)
 def test_caches_webhook_query_calls(mocker):
-    mocker.patch("django_webhook.signals.fire")
-    country = Country.objects.create(name="Bosnia")
+    mocker.patch("django_webhook.signals.fire_webhook")
+    country = Country.objects.create(name="Yugoslavia")
     WebhookFactory(
         topics=[
             WebhookTopicFactory(name="tests.Country/update"),
@@ -168,11 +173,11 @@ def test_caches_webhook_query_calls(mocker):
     with freeze_time(now):
         # First save call caches the query for webhooks
         country.save()
-        with assertNumQueries(1):
+        with assertNumQueries(1):  # pylint: disable=not-context-manager
             # The second save calls doesn't query webhooks again, but only updates the Country table
             country.save()
 
     # Move time forward and assert that the cache was busted
     with freeze_time(now + timedelta(minutes=1, seconds=1)):
-        with assertNumQueries(2):
+        with assertNumQueries(2):  # pylint: disable=not-context-manager
             country.save()

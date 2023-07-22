@@ -38,3 +38,8 @@ werkzeug = "^2.3.6"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.coverage.run]
+omit = [
+    "django_webhook/checks.py",
+]
