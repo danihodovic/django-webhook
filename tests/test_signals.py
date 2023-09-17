@@ -9,9 +9,11 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytest_django.asserts import assertNumQueries
 
-from django_webhook.test_factories import (WebhookFactory,
-                                           WebhookSecretFactory,
-                                           WebhookTopicFactory)
+from django_webhook.test_factories import (
+    WebhookFactory,
+    WebhookSecretFactory,
+    WebhookTopicFactory,
+)
 from tests.models import Country, User
 
 pytestmark = pytest.mark.django_db

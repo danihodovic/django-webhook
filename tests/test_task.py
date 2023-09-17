@@ -3,9 +3,11 @@ from celery import exceptions
 from freezegun import freeze_time
 
 from django_webhook.tasks import fire_webhook
-from django_webhook.test_factories import (WebhookFactory,
-                                           WebhookSecretFactory,
-                                           WebhookTopicFactory)
+from django_webhook.test_factories import (
+    WebhookFactory,
+    WebhookSecretFactory,
+    WebhookTopicFactory,
+)
 
 pytestmark = pytest.mark.django_db
 

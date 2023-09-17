@@ -1,8 +1,13 @@
 import factory
 from factory import SubFactory
 
-from django_webhook.models import (Webhook, WebhookEvent, WebhookSecret,
-                                   WebhookTopic, states)
+from django_webhook.models import (
+    Webhook,
+    WebhookEvent,
+    WebhookSecret,
+    WebhookTopic,
+    states,
+)
 
 
 class WebhookSecretFactory(factory.django.DjangoModelFactory):

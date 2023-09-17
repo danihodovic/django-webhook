@@ -5,6 +5,15 @@ description = ""
 authors = ["Dani Hodovic <you@example.com>"]
 license = "MIT"
 
+[tool.black]
+skip_numeric_underscore_normalization = true
+exclude = ".*(venv|virtualenv|.poetry|migrations|node_modules)"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+skip = '.virtualenv,.venv,.poetry,.poetry-cache'
+
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = "4.*"
