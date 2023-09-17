@@ -52,7 +52,7 @@ class SignalListener:
 
     def connect(self):
         self.signal.connect(
-            self.run, sender=self.model_cls, weak=False, dispatch_uid=self.uid
+            self.run, sender=self.model_cls, weak=False, dispatch_uid=self.uid  # type: ignore
         )
 
     @property
@@ -83,7 +83,7 @@ def model_dict(model):
     fields = {
         field.name: field.value_from_object(model) for field in model._meta.fields
     }
-    return model_to_dict(model, fields=fields)
+    return model_to_dict(model, fields=fields)  # type: ignore
 
 
 def _active_models():

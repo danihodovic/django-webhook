@@ -9,7 +9,7 @@ def cache(ttl=timedelta(minutes=1)):
     """
 
     def wrap(func):
-        cache = {}
+        cache = {}  # type: ignore
 
         @functools.wraps(func)
         def wrapped(*args, **kw):

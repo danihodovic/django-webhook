@@ -15,7 +15,7 @@ multi_line_output = 3
 skip = '.virtualenv,.venv,.poetry,.poetry-cache'
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.11"
 Django = "4.*"
 django-model-utils = "4.*"
 celery = "5.*"
@@ -43,6 +43,8 @@ pytest-celery = "^0.0.0"
 freezegun = "^1.2.2"
 pytest-mock = "^3.11.1"
 werkzeug = "^2.3.6"
+django-stubs = "^4.2.4"
+types-requests = "^2.31.0.2"
 
 [build-system]
 requires = ["poetry>=0.12"]

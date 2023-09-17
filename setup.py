@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from pathlib import Path
 import os
 import re
 
@@ -7,7 +8,7 @@ from setuptools import find_packages, setup
 
 def get_version(*file_paths):
     filename = os.path.join(os.path.dirname(__file__), *file_paths)
-    version_file = open(filename).read()
+    version_file = Path(filename).read_text("utf-8")
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
     if version_match:
         return version_match.group(1)
@@ -16,7 +17,7 @@ def get_version(*file_paths):
 
 version = get_version("webhooks", "__init__.py")
 
-readme = open("README.md").read()
+readme = Path("README.md").read_text("utf-8")
 
 setup(
     name="django-webhooks",

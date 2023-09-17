@@ -1,12 +1,7 @@
 import pytest
-from django.core.validators import ValidationError
+from django.core.validators import ValidationError  # type: ignore
 
-from django_webhook.models import Webhook, WebhookTopic, populate_topics_from_settings
-from django_webhook.test_factories import (
-    WebhookFactory,
-    WebhookSecretFactory,
-    WebhookTopicFactory,
-)
+from django_webhook.models import WebhookTopic, populate_topics_from_settings
 
 pytestmark = pytest.mark.django_db
 

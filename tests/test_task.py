@@ -1,5 +1,4 @@
 import pytest
-from celery import exceptions
 from freezegun import freeze_time
 
 from django_webhook.tasks import fire_webhook

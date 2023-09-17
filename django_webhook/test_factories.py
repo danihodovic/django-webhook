@@ -1,5 +1,4 @@
 import factory
-from factory import SubFactory
 
 from django_webhook.models import (
     Webhook,

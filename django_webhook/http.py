@@ -30,7 +30,7 @@ def prepare_request(webhook: Webhook, payload: dict):
 
 def sign_payload(payload: dict, secret: str, timestamp: int):
     encoder_cls = settings.DJANGO_WEBHOOK["PAYLOAD_ENCODER_CLASS"]
-    combined_payload = f"{timestamp}:{json.dumps(payload, cls=encoder_cls)}"
+    combined_payload = f"{timestamp}:{json.dumps(payload, cls=encoder_cls)}"  # type: ignore
     return hmac.new(
         key=secret.encode(), msg=combined_payload.encode(), digestmod=hashlib.sha256
     ).hexdigest()
