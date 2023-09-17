@@ -1,5 +1,7 @@
 [MASTER]
 load-plugins=pylint_django
+django-settings-module=tests.settings
+ignore=migrations
 
 [FORMAT]
 max-line-length=120
@@ -9,7 +11,8 @@ disable=missing-docstring,
 				invalid-name,
 				fixme,
 				use-dict-literal,
-				logging-fstring-interpolation
+				logging-fstring-interpolation,
+				cyclic-import
 
 [DESIGN]
 max-parents=13

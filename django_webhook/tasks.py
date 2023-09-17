@@ -65,7 +65,7 @@ def clear_webhook_events():
     """
     days_ago = settings.DJANGO_WEBHOOK["EVENTS_RETENTION_DAYS"]
     now = timezone.now()
-    cutoff_date = now - timedelta(days=days_ago)
+    cutoff_date = now - timedelta(days=days_ago)  # type: ignore
     qs = WebhookEvent.objects.filter(created__lt=cutoff_date)
     logging.info(
         f"Clearing webhook events older than {cutoff_date=}. Found {qs.count()} matching events"

@@ -3,7 +3,6 @@ import uuid
 from celery import states
 from django.conf import settings
 from django.core import validators
-from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from model_utils.fields import AutoCreatedField
@@ -20,7 +19,7 @@ STATES = [
 ]
 
 
-# Use auto update fields instead of model_utils
+# TODO: Use auto update fields instead of model_utils
 class Webhook(TimeStampedModel):
     url = models.URLField()
     topics = models.ManyToManyField(
@@ -36,7 +35,7 @@ class Webhook(TimeStampedModel):
         return f"Webhook: id={self.id} url={self.url} {topics=} active={self.active}"
 
 
-class WebhookTopic(models.Model):
+class WebhookTopic(models.Model):  # type: ignore
     name = models.CharField(
         max_length=250,
         unique=True,
@@ -95,7 +94,7 @@ class WebhookEvent(models.Model):
 
 def populate_topics_from_settings():
     # pylint: disable=import-outside-toplevel
-    from django.db.utils import IntegrityError, OperationalError
+    from django.db.utils import OperationalError
 
     from django_webhook.signals import CREATE, DELETE, UPDATE
 
