@@ -104,6 +104,8 @@ def populate_topics_from_settings():
     except (OperationalError, ProgrammingError) as ex:
         if "Connection refused" in ex.args[0]:
             return
+        if "could not translate host name" in ex.args[0]:
+            return
         if "no such table" in ex.args[0]:
             return
         if "relation" in ex.args[0] and "does not exist" in ex.args[0]:
