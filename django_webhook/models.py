@@ -95,14 +95,16 @@ class WebhookEvent(models.Model):
 
 def populate_topics_from_settings():
     # pylint: disable=import-outside-toplevel
-    from django.db.utils import OperationalError
+    from django.db.utils import OperationalError, ProgrammingError
 
     from django_webhook.signals import CREATE, DELETE, UPDATE
 
     try:
         Webhook.objects.count()
-    except OperationalError as ex:
+    except (OperationalError, ProgrammingError) as ex:
         if "no such table" in ex.args[0]:
+            return
+        if "relation" in ex.args[0] and "does not exist" in ex.args[0]:
             return
         raise ex
 
