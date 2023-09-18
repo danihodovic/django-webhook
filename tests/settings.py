@@ -64,4 +64,4 @@ CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TASK_STORE_EAGER_RESULT = True
 
-DJANGO_WEBHOOK = dict(MODELS=["tests.User", "tests.Country"])
+DJANGO_WEBHOOK = dict(MODELS=["tests.Country", "tests.User"])

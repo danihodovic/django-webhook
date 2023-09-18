@@ -24,21 +24,22 @@ def test_validates_topic_name_in_models(settings):
 
 def test_populate_topics_from_settings(settings):
     populate_topics_from_settings()
-    assert list(WebhookTopic.objects.values_list("name", flat=True)) == [
-        "tests.User/create",
-        "tests.User/update",
-        "tests.User/delete",
+    assert list(
+        WebhookTopic.objects.values_list("name", flat=True).order_by("name")
+    ) == [
         "tests.Country/create",
-        "tests.Country/update",
         "tests.Country/delete",
+        "tests.Country/update",
+        "tests.User/create",
+        "tests.User/delete",
+        "tests.User/update",
     ]
     settings.DJANGO_WEBHOOK["MODELS"] = ["tests.Country"]
     populate_topics_from_settings()
-    assert list(WebhookTopic.objects.values_list("name", flat=True)) == [
-        "tests.User/create",
-        "tests.User/update",
-        "tests.User/delete",
+    assert list(
+        WebhookTopic.objects.values_list("name", flat=True).order_by("name")
+    ) == [
         "tests.Country/create",
-        "tests.Country/update",
         "tests.Country/delete",
+        "tests.Country/update",
     ]

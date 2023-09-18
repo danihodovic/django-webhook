@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from celery import states
@@ -110,12 +111,19 @@ def populate_topics_from_settings():
     if not enabled_models:
         return
 
+    allowed_topics = set()
     for model in enabled_models:
-        allowed_topics = [
+        model_allowed_topics = {
             f"{model}/{CREATE}",
             f"{model}/{UPDATE}",
             f"{model}/{DELETE}",
-        ]
-        for topic in allowed_topics:
-            if not WebhookTopic.objects.filter(name=topic).exists():
-                WebhookTopic.objects.create(name=topic)
+        }
+        allowed_topics.update(model_allowed_topics)
+
+    WebhookTopic.objects.exclude(name__in=allowed_topics).delete()
+    logging.info(f"Purging WebhookTopics: {allowed_topics}")
+
+    for topic in allowed_topics:
+        if not WebhookTopic.objects.filter(name=topic).exists():
+            WebhookTopic.objects.create(name=topic)
+            logging.info(f"Adding topic: {topic}")
