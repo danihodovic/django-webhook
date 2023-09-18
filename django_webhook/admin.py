@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import TabularInline
 
-from django_webhook.models import Webhook, WebhookSecret
+from django_webhook.models import Webhook, WebhookEvent, WebhookSecret
 
 from .forms import WebhookForm
 
@@ -24,3 +24,25 @@ class WebhookAdmin(admin.ModelAdmin):
     search_fields = ("url",)
     filter_horizontal = ("topics",)
     inlines = [WebhookSecretInline]
+
+
+@admin.register(WebhookEvent)
+class WebhookEventAdmin(admin.ModelAdmin):
+    list_display = ("url", "status", "created", "topic")
+    list_filter = ("webhook", "status", "topic")
+    search_fields = ("webhook", "status", "topic")
+    readonly_fields = (
+        "webhook",
+        "url",
+        "status",
+        "created",
+        "topic",
+        "object_type",
+        "object",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
