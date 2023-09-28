@@ -6,8 +6,7 @@ from django.conf import settings
 from django.core import validators
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from model_utils.fields import AutoCreatedField
-from model_utils.models import TimeStampedModel
+from django.db.models.fields import DateTimeField
 
 from .validators import validate_topic_model
 
@@ -20,8 +19,7 @@ STATES = [
 ]
 
 
-# TODO: Use auto update fields instead of model_utils
-class Webhook(TimeStampedModel):
+class Webhook(models.Model):
     url = models.URLField()
     topics = models.ManyToManyField(
         "django_webhook.WebhookTopic",
@@ -30,10 +28,11 @@ class Webhook(TimeStampedModel):
     )
     active = models.BooleanField(default=True)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created = DateTimeField(auto_now_add=True)
+    modified = DateTimeField(auto_now=True)
 
     def __str__(self):
-        topics = list(self.topics.values_list("name", flat=True))
-        return f"Webhook: id={self.id} url={self.url} {topics=} active={self.active}"
+        return f"id={self.id} active={self.active}"
 
 
 class WebhookTopic(models.Model):  # type: ignore
@@ -64,7 +63,7 @@ class WebhookSecret(models.Model):
         max_length=100,
         validators=[validators.MinLengthValidator(12)],
     )
-    created = AutoCreatedField()
+    created = DateTimeField(auto_now_add=True)
 
 
 class WebhookEvent(models.Model):
@@ -88,7 +87,7 @@ class WebhookEvent(models.Model):
         choices=STATES,
         editable=False,
     )
-    created = AutoCreatedField()
+    created = DateTimeField(auto_now_add=True)
     url = models.URLField(editable=False)
     topic = models.CharField(max_length=250, null=True, editable=False)
 
