@@ -14,3 +14,7 @@ when models change.
 - Admin integration
 - Audit log with past webhook events
 - Protection from replay attacks
+
+### 📖 Documentation
+
+https://django-webhook.readthedocs.io
