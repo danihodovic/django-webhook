@@ -67,7 +67,10 @@ Configure an outgoing webhook for one of your models
 
 Set the topic to be triggered on create and update for your model.
 ```python
->>> topics = [WebhookTopic.objects.get(name="core.Product/create"), WebhookTopic.objects.get(name="core.Product/update")]
+>>> topics = [
+        WebhookTopic.objects.get(name="core.Product/create"),
+        WebhookTopic.objects.get(name="core.Product/update")
+    ]
 >>> webhook.topics.set(topics)
 ```
 
@@ -78,6 +81,27 @@ Finally create a new Product instance to trigger the webhook.
 >>> Product.objects.create(name="test")
 ```
 
-Visit the page for your unique webhook where you can expect the incoming HTTP request.
+django-webhook should send an outgoing HTTP request in the following format:
+
+```
+POST HTTP/1.1
+host: webhook.site
+user-agent: python-urllib3/2.0.3
+django-webhook-uuid: 5e2ee3ba-905e-4360-94bf-18ef21c0e844
+django-webhook-signature-v1:
+django-webhook-request-timestamp: 1697818014
+
+{
+  "topic": "core.Product/create",
+  "object": {
+    "id": 3,
+    "name": "test",
+  },
+  "object_type": "core.Product",
+  "webhook_uuid": "5e2ee3ba-905e-4360-94bf-18ef21c0e844"
+}
+```
+
+Visit [the page](https://webhook.site) for your unique webhook where you can inspect the incoming HTTP request.
 
 ![incoming-webhook-example](webhook-site-incoming-webhook.png)
