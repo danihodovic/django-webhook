@@ -6,7 +6,16 @@ USE_TZ = True
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "very-secret"
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "db.sqlite3"}}
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "NAME": "postgres",
+        "ATOMIC_REQUESTS": True,
+    }
+}
 
 ROOT_URLCONF = "tests.urls"
 
@@ -60,8 +69,9 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(__file__).parent / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = True
-CELERY_TASK_STORE_EAGER_RESULT = True
+# CELERY_TASK_ALWAYS_EAGER = True
+# CELERY_TASK_EAGER_PROPAGATES = True
+# CELERY_TASK_STORE_EAGER_RESULT = True
+CELERY_BROKER_URL = "redis://redis:6379/"
 
 DJANGO_WEBHOOK = dict(MODELS=["tests.Country", "tests.User"])

@@ -44,6 +44,7 @@ django-webhook-request-timestamp: 1697818014
 - Admin integration
 - Audit log with past webhook events
 - Protection from replay attacks
+- Allows rotating webhook secrets
 
 ### 📖 Documentation
 

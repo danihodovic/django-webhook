@@ -1,0 +1,49 @@
+services:
+  webhook_server: &defaults
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: tests.settings
+    volumes:
+      - ./tests:/app/tests
+      - ./django_webhook:/app/django_webhook
+
+  webhook_worker:
+    <<: *defaults
+    ports: []
+    command: celery --app tests.celery_app:app worker --loglevel=INFO
+
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports: ['5432:5432']
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  nodejs_receiver:
+    build:
+      context: examples/nodejs
+    ports:
+      - "8001:8001"
+
+  flask_receiver:
+    build:
+      context: examples/flask
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./examples/flask:/app/
+
+volumes:
+  pgdata:

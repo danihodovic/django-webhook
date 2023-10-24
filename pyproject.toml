@@ -38,13 +38,17 @@ ptpython = "3.*"
 [tool.poetry.group.dev.dependencies]
 factory-boy = "^3.2.1"
 pudb = "^2022.1.3"
-responses = "^0.23.1"
+responses = "^0.23.3"
 pytest-celery = "^0.0.0"
 freezegun = "^1.2.2"
 pytest-mock = "^3.11.1"
-werkzeug = "^2.3.6"
+werkzeug = "^3.0.0"
 django-stubs = "^4.2.4"
 types-requests = "^2.31.0.2"
+pyyaml = "^6.0.1"
+celery = {extras = ["redis"], version = "^5.3.4"}
+psycopg2 = "^2.9.9"
+flask = "^3.0.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
