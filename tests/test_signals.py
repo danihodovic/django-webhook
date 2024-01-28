@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import pytest
 from django.test import override_settings
@@ -18,6 +18,9 @@ from tests.models import Country, User
 
 pytestmark = pytest.mark.django_db
 
+TEST_JOIN_DATE = date(1970, 1, 1)
+TEST_LAST_ACTIVE = datetime(2000, 1, 1, 12, 0, 0)
+
 
 @freeze_time("2012-01-14 03:21:34")
 def test_create(responses):
@@ -28,7 +31,12 @@ def test_create(responses):
     secret = WebhookSecretFactory(webhook=webhook, token="very-secret-token")
     responses.post(webhook.url)
 
-    User.objects.create(name="Dani", email="dani@doo.com")
+    User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=TEST_JOIN_DATE,
+        last_active=TEST_LAST_ACTIVE,
+    )
     assert len(responses.calls) == 1
     req = responses.calls[0].request
     now = timezone.now()
@@ -36,7 +44,13 @@ def test_create(responses):
     assert req.headers["Django-Webhook-UUID"] == str(webhook.uuid)
     assert json.loads(req.body) == {
         "topic": "tests.User/create",
-        "object": {"id": 1, "name": "Dani", "email": "dani@doo.com"},
+        "object": {
+            "id": 1,
+            "name": "Dani",
+            "email": "dani@doo.com",
+            "join_date": "1970-01-01",
+            "last_active": "2000-01-01T12:00:00",
+        },
         "object_type": "tests.User",
         "webhook_uuid": "54c10b6e-42e7-4edc-a047-a53c7ff80c77",
     }
@@ -51,7 +65,12 @@ def test_create(responses):
 
 
 def test_update(responses):
-    user = User.objects.create(name="Dani", email="dani@doo.com")
+    user = User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=TEST_JOIN_DATE,
+        last_active=TEST_LAST_ACTIVE,
+    )
     webhook = WebhookFactory(
         topics=[WebhookTopicFactory(name="tests.User/update")],
     )
@@ -63,14 +82,25 @@ def test_update(responses):
     req = responses.calls[0].request
     assert json.loads(req.body) == {
         "topic": "tests.User/update",
-        "object": {"id": 1, "name": "Adin", "email": "dani@doo.com"},
+        "object": {
+            "id": 1,
+            "name": "Adin",
+            "email": "dani@doo.com",
+            "join_date": "1970-01-01",
+            "last_active": "2000-01-01T12:00:00",
+        },
         "object_type": "tests.User",
         "webhook_uuid": str(webhook.uuid),
     }
 
 
 def test_delete(responses):
-    user = User.objects.create(name="Dani", email="dani@doo.com")
+    user = User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=TEST_JOIN_DATE,
+        last_active=TEST_LAST_ACTIVE,
+    )
     webhook = WebhookFactory(
         topics=[WebhookTopicFactory(name="tests.User/delete")],
     )
@@ -81,7 +111,13 @@ def test_delete(responses):
     req = responses.calls[0].request
     assert json.loads(req.body) == {
         "topic": "tests.User/delete",
-        "object": {"id": 1, "name": "Dani", "email": "dani@doo.com"},
+        "object": {
+            "id": 1,
+            "name": "Dani",
+            "email": "dani@doo.com",
+            "join_date": "1970-01-01",
+            "last_active": "2000-01-01T12:00:00",
+        },
         "object_type": "tests.User",
         "webhook_uuid": str(webhook.uuid),
     }
@@ -92,14 +128,24 @@ def test_filters_topic_by_type(responses):
         topics=[WebhookTopicFactory(name="tests.User/update")],
     )
     responses.post(webhook.url)
-    user = User.objects.create(name="Dani", email="dani@doo.com")
+    user = User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=TEST_JOIN_DATE,
+        last_active=TEST_LAST_ACTIVE,
+    )
     assert len(responses.calls) == 0
     user.save()
     assert len(responses.calls) == 1
 
 
 def test_multiple_topic_types(responses):
-    user = User.objects.create(name="Dani", email="dani@doo.com")
+    user = User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=TEST_JOIN_DATE,
+        last_active=TEST_LAST_ACTIVE,
+    )
     webhook = WebhookFactory(
         topics=[
             WebhookTopicFactory(name="tests.User/create"),
@@ -114,7 +160,12 @@ def test_multiple_topic_types(responses):
 
 
 def test_multiple_topic_models(responses):
-    User.objects.create(name="Dani", email="dani@doo.com")
+    User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=TEST_JOIN_DATE,
+        last_active=TEST_LAST_ACTIVE,
+    )
     country = Country.objects.create(name="Sweden")
     webhook = WebhookFactory(
         topics=[

@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 
 import pytest
 from django.core.serializers.json import DjangoJSONEncoder
@@ -31,13 +31,24 @@ def test_creates_events_when_enabled(responses):
     )
     responses.post(webhook.url)
 
-    User.objects.create(name="Dani", email="dani@doo.com")
+    User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=date(1970, 1, 1),
+        last_active=datetime(2000, 1, 1, 12, 0, 0),
+    )
     assert WebhookEvent.objects.count() == 1
     event = WebhookEvent.objects.get()
     assert event.webhook == webhook
     assert event.object == {
         "topic": "tests.User/create",
-        "object": {"id": 1, "name": "Dani", "email": "dani@doo.com"},
+        "object": {
+            "id": 1,
+            "name": "Dani",
+            "email": "dani@doo.com",
+            "join_date": "1970-01-01",
+            "last_active": "2000-01-01T12:00:00",
+        },
         "object_type": "tests.User",
         "webhook_uuid": str(webhook.uuid),
     }
@@ -59,7 +70,12 @@ def test_does_not_create_events_when_disabled(responses):
     webhook = WebhookFactory(topics=[WebhookTopicFactory(name="tests.User/create")])
     responses.post(webhook.url)
 
-    User.objects.create(name="Dani", email="dani@doo.com")
+    User.objects.create(
+        name="Dani",
+        email="dani@doo.com",
+        join_date=date(1970, 1, 1),
+        last_active=datetime(2000, 1, 1, 12, 0, 0),
+    )
     assert WebhookEvent.objects.count() == 0
 
 

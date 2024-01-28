@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 from datetime import datetime
+from json import JSONEncoder
 
 from django.conf import settings
 from django.utils import timezone
@@ -14,8 +15,9 @@ def prepare_request(webhook: Webhook, payload: dict):
     now = timezone.now()
     timestamp = int(datetime.timestamp(now))
 
+    encoder_cls = settings.DJANGO_WEBHOOK["PAYLOAD_ENCODER_CLASS"]
     signatures = [
-        sign_payload(payload, secret, timestamp)
+        sign_payload(payload, secret, timestamp, encoder_cls)
         for secret in webhook.secrets.values_list("token", flat=True)
     ]
     headers = {
@@ -24,12 +26,16 @@ def prepare_request(webhook: Webhook, payload: dict):
         "Django-Webhook-Signature-v1": ",".join(signatures),
         "Django-Webhook-UUID": str(webhook.uuid),
     }
-    r = Request(method="POST", url=webhook.url, headers=headers, json=payload)
+    r = Request(
+        method="POST",
+        url=webhook.url,
+        headers=headers,
+        data=json.dumps(payload, cls=encoder_cls).encode(),
+    )
     return r.prepare()
 
 
-def sign_payload(payload: dict, secret: str, timestamp: int):
-    encoder_cls = settings.DJANGO_WEBHOOK["PAYLOAD_ENCODER_CLASS"]
+def sign_payload(payload: dict, secret: str, timestamp: int, encoder_cls: JSONEncoder):
     combined_payload = f"{timestamp}:{json.dumps(payload, cls=encoder_cls)}"  # type: ignore
     return hmac.new(
         key=secret.encode(), msg=combined_payload.encode(), digestmod=hashlib.sha256
