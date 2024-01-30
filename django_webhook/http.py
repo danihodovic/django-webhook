@@ -16,7 +16,9 @@ def prepare_request(webhook: Webhook, payload: dict):
     now = timezone.now()
     timestamp = int(datetime.timestamp(now))
 
-    encoder_cls = cast(JSONEncoder, settings.DJANGO_WEBHOOK["PAYLOAD_ENCODER_CLASS"])
+    encoder_cls = cast(
+        type[JSONEncoder], settings.DJANGO_WEBHOOK["PAYLOAD_ENCODER_CLASS"]
+    )
     signatures = [
         sign_payload(payload, secret, timestamp, encoder_cls)
         for secret in webhook.secrets.values_list("token", flat=True)
@@ -36,8 +38,10 @@ def prepare_request(webhook: Webhook, payload: dict):
     return r.prepare()
 
 
-def sign_payload(payload: dict, secret: str, timestamp: int, encoder_cls: JSONEncoder):
-    combined_payload = f"{timestamp}:{json.dumps(payload, cls=encoder_cls)}"  # type: ignore
+def sign_payload(
+    payload: dict, secret: str, timestamp: int, encoder_cls: type[JSONEncoder]
+):
+    combined_payload = f"{timestamp}:{json.dumps(payload, cls=encoder_cls)}"
     return hmac.new(
         key=secret.encode(), msg=combined_payload.encode(), digestmod=hashlib.sha256
     ).hexdigest()
