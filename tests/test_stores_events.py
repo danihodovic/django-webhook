@@ -12,6 +12,7 @@ from django_webhook.test_factories import (
     WebhookFactory,
     WebhookTopicFactory,
 )
+from tests.model_data import TEST_USER
 from tests.models import User
 
 pytestmark = pytest.mark.django_db
@@ -42,13 +43,7 @@ def test_creates_events_when_enabled(responses):
     assert event.webhook == webhook
     assert event.object == {
         "topic": "tests.User/create",
-        "object": {
-            "id": 1,
-            "name": "Dani",
-            "email": "dani@doo.com",
-            "join_date": "1970-01-01",
-            "last_active": "2000-01-01T12:00:00",
-        },
+        "object": TEST_USER,
         "object_type": "tests.User",
         "webhook_uuid": str(webhook.uuid),
     }

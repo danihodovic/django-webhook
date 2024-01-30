@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import json
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pytest
 from django.test import override_settings
@@ -14,12 +14,10 @@ from django_webhook.test_factories import (
     WebhookSecretFactory,
     WebhookTopicFactory,
 )
+from tests.model_data import TEST_JOIN_DATE, TEST_LAST_ACTIVE, TEST_USER
 from tests.models import Country, User
 
 pytestmark = pytest.mark.django_db
-
-TEST_JOIN_DATE = date(1970, 1, 1)
-TEST_LAST_ACTIVE = datetime(2000, 1, 1, 12, 0, 0)
 
 
 @freeze_time("2012-01-14 03:21:34")
@@ -44,13 +42,7 @@ def test_create(responses):
     assert req.headers["Django-Webhook-UUID"] == str(webhook.uuid)
     assert json.loads(req.body) == {
         "topic": "tests.User/create",
-        "object": {
-            "id": 1,
-            "name": "Dani",
-            "email": "dani@doo.com",
-            "join_date": "1970-01-01",
-            "last_active": "2000-01-01T12:00:00",
-        },
+        "object": TEST_USER,
         "object_type": "tests.User",
         "webhook_uuid": "54c10b6e-42e7-4edc-a047-a53c7ff80c77",
     }
@@ -80,15 +72,11 @@ def test_update(responses):
     user.save()
     assert len(responses.calls) == 1
     req = responses.calls[0].request
+    expected_object = TEST_USER.copy()
+    expected_object["name"] = "Adin"
     assert json.loads(req.body) == {
         "topic": "tests.User/update",
-        "object": {
-            "id": 1,
-            "name": "Adin",
-            "email": "dani@doo.com",
-            "join_date": "1970-01-01",
-            "last_active": "2000-01-01T12:00:00",
-        },
+        "object": expected_object,
         "object_type": "tests.User",
         "webhook_uuid": str(webhook.uuid),
     }
@@ -111,13 +99,7 @@ def test_delete(responses):
     req = responses.calls[0].request
     assert json.loads(req.body) == {
         "topic": "tests.User/delete",
-        "object": {
-            "id": 1,
-            "name": "Dani",
-            "email": "dani@doo.com",
-            "join_date": "1970-01-01",
-            "last_active": "2000-01-01T12:00:00",
-        },
+        "object": TEST_USER,
         "object_type": "tests.User",
         "webhook_uuid": str(webhook.uuid),
     }
