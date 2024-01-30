@@ -3,6 +3,7 @@ import hmac
 import json
 from datetime import datetime
 from json import JSONEncoder
+from typing import cast
 
 from django.conf import settings
 from django.utils import timezone
@@ -15,7 +16,7 @@ def prepare_request(webhook: Webhook, payload: dict):
     now = timezone.now()
     timestamp = int(datetime.timestamp(now))
 
-    encoder_cls = settings.DJANGO_WEBHOOK["PAYLOAD_ENCODER_CLASS"]
+    encoder_cls = cast(JSONEncoder, settings.DJANGO_WEBHOOK["PAYLOAD_ENCODER_CLASS"])
     signatures = [
         sign_payload(payload, secret, timestamp, encoder_cls)
         for secret in webhook.secrets.values_list("token", flat=True)
