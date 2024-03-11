@@ -49,5 +49,6 @@ django-webhook-request-timestamp: 1697818014
 ### 📜 Table of Contents
 ```{toctree}
 install
+celery
 examples
 ```
