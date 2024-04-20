@@ -36,7 +36,7 @@ django-webhook-request-timestamp: 1697818014
 }
 ```
 
-### 🔥 Feautures
+### 🔥 Features
 - Automatically sends webhooks on model changes
 - Leverages Celery for processing
 - Webhook authentication using HMAC
