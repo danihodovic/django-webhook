@@ -9,6 +9,7 @@ from django.forms import model_to_dict
 from django.utils.module_loading import import_string
 
 from django_webhook.models import Webhook
+from typing import assert_never, Protocol
 
 from .tasks import fire_webhook
 from .util import cache
@@ -18,7 +19,12 @@ UPDATE = "update"
 DELETE = "delete"
 
 
-class SignalListener:
+class SignalListenerBase(Protocol):
+    def run(self, sender, created=False, instance=None, **kwargs): ...
+    def connect(self): ...
+
+
+class SignalListener(SignalListenerBase):
     def __init__(self, signal: ModelSignal, signal_name: str, model_cls: models.Model):
         valid_signals = ["post_save", "post_delete"]
         if signal_name not in valid_signals:
@@ -27,7 +33,7 @@ class SignalListener:
         self.signal = signal
         self.signal_name = signal_name
         self.model_cls = model_cls
-    
+
     # pylint: disable=unused-argument
     def run(self, sender, created=False, instance=None, **kwargs):
         action_type = None
@@ -38,18 +44,26 @@ class SignalListener:
                 action_type = UPDATE
             case "post_delete":
                 action_type = DELETE
+            case _:
+                assert_never(self.signal_name)
 
         topic = f"{self.model_label}/{action_type}"
-        webhook_ids = _find_webhooks(topic)
+        webhook_ids = self.find_webhooks(topic=topic, instance=instance)
 
         for id, uuid in webhook_ids:
             payload = dict(
                 topic=topic,
-                object=self.model_dict(instance),
+                object=self.serialize(instance),
                 object_type=self.model_label,
                 webhook_uuid=str(uuid),
             )
             fire_webhook.delay(id, payload)
+
+    def find_webhooks(self, topic: str, instance=None):
+        return _find_webhooks(topic)
+
+    def serialize(self, instance):
+        return model_dict(instance)
 
     def connect(self):
         self.signal.connect(
@@ -64,25 +78,13 @@ class SignalListener:
     def model_label(self):
         return self.model_cls._meta.label
 
-    def model_dict(self, model):
-        """
-        Returns the model instance as a dict, nested values for related models.
-        """
-        fields = {
-            field.name: field.value_from_object(model) for field in model._meta.fields
-        }
-        return model_to_dict(model, fields=fields)  # type: ignore
 
-
-def connect_signals():    
+def connect_signals():
     SignalListenerClass = import_string(
         dotted_path=settings.DJANGO_WEBHOOK.get(
             "SIGNAL_LISTENER", "django_webhook.signals.SignalListener"
         )
     )
-
-    print(">" * 100)
-    print(SignalListenerClass)
 
     for cls in _active_models():
         post_save_listener = SignalListenerClass(
@@ -93,6 +95,16 @@ def connect_signals():
         )
         post_save_listener.connect()
         post_delete_listener.connect()
+
+
+def model_dict(model):
+    """
+    Returns the model instance as a dict, nested values for related models.
+    """
+    fields = {
+        field.name: field.value_from_object(model) for field in model._meta.fields
+    }
+    return model_to_dict(model, fields=fields)  # type: ignore
 
 
 def _active_models():
