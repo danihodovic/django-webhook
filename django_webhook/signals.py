@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models.signals import ModelSignal, post_delete, post_save
 from django.forms import model_to_dict
+from django.utils.module_loading import import_string
 
 from django_webhook.models import Webhook
 
@@ -26,7 +27,7 @@ class SignalListener:
         self.signal = signal
         self.signal_name = signal_name
         self.model_cls = model_cls
-
+    
     # pylint: disable=unused-argument
     def run(self, sender, created=False, instance=None, **kwargs):
         action_type = None
@@ -44,7 +45,7 @@ class SignalListener:
         for id, uuid in webhook_ids:
             payload = dict(
                 topic=topic,
-                object=model_dict(instance),
+                object=self.model_dict(instance),
                 object_type=self.model_label,
                 webhook_uuid=str(uuid),
             )
@@ -63,27 +64,35 @@ class SignalListener:
     def model_label(self):
         return self.model_cls._meta.label
 
+    def model_dict(self, model):
+        """
+        Returns the model instance as a dict, nested values for related models.
+        """
+        fields = {
+            field.name: field.value_from_object(model) for field in model._meta.fields
+        }
+        return model_to_dict(model, fields=fields)  # type: ignore
 
-def connect_signals():
+
+def connect_signals():    
+    SignalListenerClass = import_string(
+        dotted_path=settings.DJANGO_WEBHOOK.get(
+            "SIGNAL_LISTENER", "django_webhook.signals.SignalListener"
+        )
+    )
+
+    print(">" * 100)
+    print(SignalListenerClass)
+
     for cls in _active_models():
-        post_save_listener = SignalListener(
+        post_save_listener = SignalListenerClass(
             signal=post_save, signal_name="post_save", model_cls=cls
         )
-        post_delete_listener = SignalListener(
+        post_delete_listener = SignalListenerClass(
             signal=post_delete, signal_name="post_delete", model_cls=cls
         )
         post_save_listener.connect()
         post_delete_listener.connect()
-
-
-def model_dict(model):
-    """
-    Returns the model instance as a dict, nested values for related models.
-    """
-    fields = {
-        field.name: field.value_from_object(model) for field in model._meta.fields
-    }
-    return model_to_dict(model, fields=fields)  # type: ignore
 
 
 def _active_models():
