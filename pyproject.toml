@@ -6,7 +6,7 @@ authors = ["Dani Hodovic <you@example.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/danihodovic/django-webhook"
-documentation = "https://github.com/danihodovic/django-webhook"
+documentation = "https://django-webhook.readthedocs.io/en/latest/"
 keywords = ["webhooks", "http", "microservices"]
 classifiers = [
 	"Topic :: Internet :: WWW/HTTP",
