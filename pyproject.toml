@@ -4,6 +4,7 @@ version = "0.0.8"
 description = ""
 authors = ["Dani Hodovic <you@example.com>"]
 license = "MIT"
+readme = "README.md"
 
 [tool.black]
 skip_numeric_underscore_normalization = true
