@@ -32,7 +32,6 @@ def test_invalid_signal_listener():
 
 class CustomSignalListener(SignalListener):
     def run(self, sender, created=False, instance=None, **kwargs):
-        print("R" * 100)
         if isinstance(instance, Country) and instance.name in [
             "France",
             "Spain",
@@ -42,7 +41,6 @@ class CustomSignalListener(SignalListener):
             return super().run(sender, created, instance, **kwargs)
 
     def model_dict(self, model):
-        print("M" * 100)
         return {"id": model.id, "country_name": model.name}
 
 

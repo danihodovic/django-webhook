@@ -91,10 +91,7 @@ def connect_signals():
         raise ValueError(
             f"{SignalListenerClass} must be a subclass of {SignalListener}"
         )
-    
-    print("C" * 100)
-    print(SignalListenerClass)
-    
+        
     for cls in _active_models():
         post_save_listener = SignalListenerClass(
             signal=post_save, signal_name="post_save", model_cls=cls
