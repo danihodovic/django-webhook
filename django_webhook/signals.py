@@ -31,6 +31,7 @@ class SignalListener:
 
     # pylint: disable=unused-argument
     def run(self, sender, created=False, instance=None, **kwargs):
+        print("!" * 100)
         action_type = None
         match self.signal_name:
             case "post_save" if created:
@@ -90,6 +91,9 @@ def connect_signals():
         raise ValueError(
             f"{SignalListenerClass} must be a subclass of {SignalListener}"
         )
+    
+    print("C" * 100)
+    print(SignalListenerClass)
     
     for cls in _active_models():
         post_save_listener = SignalListenerClass(
