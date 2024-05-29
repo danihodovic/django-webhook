@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timedelta
 
 import pytest
+from django.db.models.signals import post_save, post_delete
 from django.test import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
@@ -14,8 +15,11 @@ from django_webhook.test_factories import (
     WebhookSecretFactory,
     WebhookTopicFactory,
 )
+from django_webhook.signals import SignalListener
+
 from tests.model_data import TEST_JOIN_DATE, TEST_LAST_ACTIVE, TEST_USER
 from tests.models import Country, User
+
 
 pytestmark = pytest.mark.django_db
 
@@ -216,3 +220,16 @@ def test_caches_webhook_query_calls(mocker):
     with freeze_time(now + timedelta(minutes=1, seconds=1)):
         with assertNumQueries(2):  # pylint: disable=not-context-manager
             country.save()
+
+
+def test_signal_listener_uid():
+    assert (
+        SignalListener(signal=post_save, signal_name="post_save", model_cls=Country).uid
+        == "django_webhook_tests.Country_post_save"
+    )
+    assert (
+        SignalListener(
+            signal=post_delete, signal_name="post_delete", model_cls=Country
+        ).uid
+        == "django_webhook_tests.Country_post_delete"
+    )
