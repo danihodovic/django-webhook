@@ -65,7 +65,7 @@ class SignalListener:
 
     @property
     def uid(self):
-        return f"django_webhook_{self.model_label}_{self.signal}"
+        return f"django_webhook_{self.model_label}_{self.signal_name}"
 
     @property
     def model_label(self):
