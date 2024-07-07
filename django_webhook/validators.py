@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 
-def validate_topic_model(value):
+def validate_topic_model(value: str):
     webhook_settings = getattr(settings, "DJANGO_WEBHOOK", {})
     allowed_models = webhook_settings.get("MODELS", [])
     if not webhook_settings or not allowed_models:
