@@ -28,7 +28,7 @@ class SignalListener:
         self.model_cls = model_cls
 
     # pylint: disable=unused-argument
-    def run(self, sender, created=False, instance=None, **kwargs):
+    def run(self, sender, created: bool = False, instance=None, **kwargs):
         action_type = None
         match self.signal_name:
             case "post_save" if created:

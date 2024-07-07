@@ -21,7 +21,7 @@ from .http import prepare_request
     retry_backoff_max=60 * 60,
     retry_jitter=False,
 )
-def fire_webhook(self, webhook_id, payload):
+def fire_webhook(self, webhook_id: int, payload: dict):
     webhook = Webhook.objects.get(id=webhook_id)
     if not webhook.active:
         logging.warning(f"Webhook: {webhook} is inactive and I will not fire it.")
