@@ -18,7 +18,7 @@ DELETE = "delete"
 
 
 class SignalListener:
-    def __init__(self, signal: ModelSignal, signal_name: str, model_cls: models.Model):
+    def __init__(self, signal: ModelSignal, signal_name: str, model_cls: type[models.Model]):
         valid_signals = ["post_save", "post_delete"]
         if signal_name not in valid_signals:
             raise ValueError(f"{signal} must be one of {valid_signals}")
