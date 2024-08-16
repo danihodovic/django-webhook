@@ -30,10 +30,14 @@ def test_populate_topics_from_settings(settings):
         "tests.Country/create",
         "tests.Country/delete",
         "tests.Country/update",
+        "tests.ModelWithFileField/create",
+        "tests.ModelWithFileField/delete",
+        "tests.ModelWithFileField/update",
         "tests.User/create",
         "tests.User/delete",
         "tests.User/update",
     ]
+
     settings.DJANGO_WEBHOOK["MODELS"] = ["tests.Country"]
     populate_topics_from_settings()
     assert list(

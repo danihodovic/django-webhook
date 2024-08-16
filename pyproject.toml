@@ -31,34 +31,34 @@ django-model-utils = "4.*"
 celery = "5.*"
 requests = "2.*"
 
-[tool.poetry.dev-dependencies]
-django-extensions = "3.*"
-pytest = "7.*"
-pytest-cov = "4.*"
-pytest-django = "4.*"
+[tool.poetry.group.dev.dependencies]
+black = {extras = ["d"], version = "^24.8.0"}
+celery = {extras = ["redis"], version = "^5.3.4"}
 coverage = "7.*"
 django-coverage-plugin = "3.*"
-black = "23.*"
-mypy = "1.*"
-mypy-extensions = "1.*"
-pylint = "2.*"
-pylint-django = "2.*"
-ptpython = "3.*"
-
-[tool.poetry.group.dev.dependencies]
-factory-boy = "^3.2.1"
-pudb = "^2022.1.3"
-responses = "^0.23.3"
-pytest-celery = "^0.0.0"
-freezegun = "^1.2.2"
-pytest-mock = "^3.11.1"
-werkzeug = "^3.0.0"
+django-extensions = "3.*"
 django-stubs = "^4.2.4"
-types-requests = "^2.31.0.2"
-pyyaml = "^6.0.1"
-celery = {extras = ["redis"], version = "^5.3.4"}
-psycopg2 = "^2.9.9"
+factory-boy = "^3.2.1"
 flask = "^3.0.0"
+freezegun = "^1.2.2"
+isort = "^5.13.2"
+mypy = "^1.11.1"
+mypy-extensions = "1.*"
+psycopg2 = "^2.9.9"
+ptpython = "3.*"
+pudb = "^2022.1.3"
+pylint = "^3.2.6"
+pylint-django = "2.*"
+pytest = "^8.3.2"
+pytest-celery = "^0.0.0"
+pytest-cov = "4.*"
+pytest-django = "4.*"
+pytest-factoryboy = "^2.7.0"
+pytest-mock = "^3.11.1"
+pyyaml = "^6.0.1"
+responses = "^0.23.3"
+types-requests = "^2.31.0.2"
+werkzeug = "^3.0.0"
 
 [build-system]
 requires = ["poetry>=0.12"]

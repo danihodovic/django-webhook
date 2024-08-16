@@ -2,11 +2,12 @@ import logging
 import uuid
 
 from celery import states
-from django.conf import settings
 from django.core import validators
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.fields import DateTimeField
+
+from django_webhook.settings import get_settings
 
 from .validators import validate_topic_model
 
@@ -111,7 +112,7 @@ def populate_topics_from_settings():
             return
         raise ex
 
-    webhook_settings = getattr(settings, "DJANGO_WEBHOOK", {})
+    webhook_settings = get_settings()
     enabled_models = webhook_settings.get("MODELS")
     if not enabled_models:
         return

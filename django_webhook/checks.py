@@ -1,11 +1,12 @@
 # pylint: disable=import-outside-toplevel,unused-argument
-from django.conf import settings
 from django.core.checks import Error, register
+
+from .settings import get_settings
 
 
 @register()
 def warn_about_webhooks_settings(app_configs, **kwargs):
-    webhook_settings = getattr(settings, "DJANGO_WEBHOOK")
+    webhook_settings = get_settings()
     errors = []
     if not webhook_settings:
         errors.append(

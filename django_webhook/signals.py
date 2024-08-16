@@ -1,14 +1,15 @@
 # pylint: disable=redefined-builtin
+import json
 from datetime import timedelta
 
 from django.apps import apps
-from django.conf import settings
 from django.db import models
 from django.db.models.signals import ModelSignal, post_delete, post_save
 from django.forms import model_to_dict
 
 from django_webhook.models import Webhook
 
+from .settings import get_settings
 from .tasks import fire_webhook
 from .util import cache
 
@@ -42,15 +43,22 @@ class SignalListener:
 
         topic = f"{self.model_label}/{action_type}"
         webhook_ids = _find_webhooks(topic)
+        encoder_cls = get_settings()["PAYLOAD_ENCODER_CLASS"]
 
         for id, uuid in webhook_ids:
-            payload = dict(
-                topic=topic,
+            payload_dict = dict(
                 object=model_dict(instance),
+                topic=topic,
                 object_type=self.model_label,
                 webhook_uuid=str(uuid),
             )
-            fire_webhook.delay(id, payload)
+            payload = json.dumps(payload_dict, cls=encoder_cls)
+            fire_webhook.delay(
+                id,
+                payload,
+                topic=topic,
+                object_type=self.model_label,
+            )
 
     def connect(self):
         self.signal.connect(
@@ -89,7 +97,7 @@ def model_dict(model):
 
 
 def _active_models():
-    model_names = settings.DJANGO_WEBHOOK.get("MODELS", [])
+    model_names = get_settings().get("MODELS", [])
     model_classes = []
     for name in model_names:
         parts = name.split(".")
@@ -108,7 +116,7 @@ def _find_webhooks(topic: str):
     """
     In tests and for smaller setups we don't want to cache the query.
     """
-    if settings.DJANGO_WEBHOOK["USE_CACHE"]:
+    if get_settings()["USE_CACHE"]:
         return _query_webhooks_cached(topic)
     return _query_webhooks(topic)
 
