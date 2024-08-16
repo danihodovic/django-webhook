@@ -10,3 +10,12 @@ class User(models.Model):
 
 class Country(models.Model):
     name = models.CharField(max_length=30)
+
+
+class ModelWithFileField(models.Model):
+    """
+        The FileField can't be encoded with JSON.
+    https://github.com/danihodovic/django-webhook/issues/35
+    """
+
+    file = models.FileField()

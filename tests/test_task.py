@@ -18,7 +18,7 @@ def test_fire(responses):
         topics=[WebhookTopicFactory(name="tests.User/create")],
     )
     responses.post(webhook.url)
-    fire_webhook.delay(webhook.id, payload=dict(hello="world"))
+    fire_webhook.delay(webhook.id, payload='{"hello": "world"}')
     assert len(responses.calls) == 1
     req = responses.calls[0].request
     assert req.body == b'{"hello": "world"}'
@@ -46,7 +46,7 @@ def test_multiple_signatures(responses):
     WebhookSecretFactory(webhook=webhook, token="Hugh-Clowers-Thompson-Jr")
     WebhookSecretFactory(webhook=webhook, token="Augusto-César-Sandino")
     responses.post(webhook.url)
-    fire_webhook.delay(webhook.id, payload=dict(hello="world"))
+    fire_webhook.delay(webhook.id, payload='{"hello": "world"}')
     assert len(responses.calls) == 1
     h = responses.calls[0].request.headers
     # pylint: disable=line-too-long

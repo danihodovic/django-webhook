@@ -74,4 +74,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 # CELERY_TASK_STORE_EAGER_RESULT = True
 CELERY_BROKER_URL = "redis://redis:6379/"
 
-DJANGO_WEBHOOK = dict(MODELS=["tests.Country", "tests.User"])
+DJANGO_WEBHOOK = dict(
+    MODELS=["tests.Country", "tests.User", "tests.ModelWithFileField"]
+)
