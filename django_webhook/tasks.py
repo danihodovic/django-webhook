@@ -37,6 +37,8 @@ def fire_webhook(
     req = prepare_request(webhook, payload)  # type: ignore
     settings = get_settings()
     store_events = settings["STORE_EVENTS"]
+    before_request = settings.get("BEFORE_REQUEST")
+    after_request = settings.get("AFTER_REQUEST")
 
     if store_events:
         event = WebhookEvent.objects.create(
@@ -47,15 +49,22 @@ def fire_webhook(
             url=webhook.url,
             topic=topic,
         )
+    if before_request:
+        before_request(webhook, payload)
     try:
-        Session().send(req).raise_for_status()
+        response = Session().send(req)
+        response.raise_for_status()
         if store_events:
             WebhookEvent.objects.filter(id=event.id).update(status=states.SUCCESS)
+        if after_request:
+            after_request(webhook, payload, response)
     except RequestException as ex:
         status_code = ex.response.status_code  # type: ignore
         logging.warning(f"Webhook request failed {status_code=}")
         if store_events:
             WebhookEvent.objects.filter(id=event.id).update(status=states.FAILURE)
+        if after_request:
+            after_request(webhook, payload, ex.response)
         raise self.retry(exc=ex)
 
 

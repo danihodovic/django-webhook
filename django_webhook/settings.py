@@ -20,4 +20,12 @@ def get_settings():
     if isinstance(encoder_cls, str):
         webhook_settings["PAYLOAD_ENCODER_CLASS"] = import_string(encoder_cls)
 
+    before_request = webhook_settings.get("BEFORE_REQUEST")
+    if isinstance(before_request, str):
+        webhook_settings["BEFORE_REQUEST"] = import_string(before_request)
+
+    after_request = webhook_settings.get("AFTER_REQUEST")
+    if isinstance(after_request, str):
+        webhook_settings["AFTER_REQUEST"] = import_string(after_request)
+
     return webhook_settings
