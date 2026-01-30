@@ -20,4 +20,14 @@ def get_settings():
     if isinstance(encoder_cls, str):
         webhook_settings["PAYLOAD_ENCODER_CLASS"] = import_string(encoder_cls)
 
+    model_serializer = webhook_settings.get("MODEL_SERIALIZER")
+    if model_serializer and isinstance(model_serializer, str):
+        resolved_func = import_string(model_serializer)
+        if not callable(resolved_func):
+            raise ImportError(
+                "DJANGO_WEBHOOK['MODEL_SERIALIZER'] must be a callable that accepts a "
+                "Django model instance as its first argument."
+            )
+        webhook_settings["MODEL_SERIALIZER"] = resolved_func
+
     return webhook_settings

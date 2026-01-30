@@ -21,6 +21,9 @@ from tests.model_data import TEST_JOIN_DATE, TEST_LAST_ACTIVE, TEST_USER
 from tests.models import Country, User
 
 
+from django.db import models
+
+
 pytestmark = pytest.mark.django_db
 
 
@@ -232,4 +235,44 @@ def test_signal_listener_uid():
             signal=post_delete, signal_name="post_delete", model_cls=Country
         ).uid
         == "django_webhook_tests.Country_post_delete"
+    )
+
+def custom_model_serializer(instance: models.Model) -> dict:
+    return {
+        "custom_id": instance.pk, 
+        "custom_name": getattr(instance, "name", "")
+    }
+
+
+def test_model_serializer(mocker):
+    mock_fire_webhook = mocker.patch("django_webhook.signals.fire_webhook")
+
+    webhook = WebhookFactory(
+        topics=[
+            WebhookTopicFactory(name="tests.Country/update"),
+        ],
+    )
+
+    country = Country.objects.create(name="Coruscant")
+
+    with override_settings(
+        DJANGO_WEBHOOK={"MODEL_SERIALIZER": "tests.test_signals.custom_model_serializer"}
+    ):
+        country.save()
+
+    mock_fire_webhook.delay.assert_called_once_with(
+        webhook.id,
+        json.dumps(
+            {
+                "object": {
+                    "custom_id": country.id, 
+                    "custom_name": "Coruscant"
+                },
+                "topic": "tests.Country/update",
+                "object_type": "tests.Country",
+                "webhook_uuid": str(webhook.uuid),
+            },
+        ),
+        topic="tests.Country/update",
+        object_type="tests.Country",
     )

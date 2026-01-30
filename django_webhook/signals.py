@@ -43,11 +43,16 @@ class SignalListener:
 
         topic = f"{self.model_label}/{action_type}"
         webhook_ids = _find_webhooks(topic)
-        encoder_cls = get_settings()["PAYLOAD_ENCODER_CLASS"]
 
+        settings = get_settings()
+        encoder_cls = settings.get("PAYLOAD_ENCODER_CLASS", None)
+
+        model_serializer = settings.get("MODEL_SERIALIZER", model_dict)
+        object = model_serializer(instance) if instance is not None else None
+        
         for id, uuid in webhook_ids:
             payload_dict = dict(
-                object=model_dict(instance),
+                object=object,
                 topic=topic,
                 object_type=self.model_label,
                 webhook_uuid=str(uuid),
@@ -62,7 +67,10 @@ class SignalListener:
 
     def connect(self):
         self.signal.connect(
-            self.run, sender=self.model_cls, weak=False, dispatch_uid=self.uid  # type: ignore
+            self.run,
+            sender=self.model_cls,
+            weak=False,
+            dispatch_uid=self.uid,  # type: ignore
         )
 
     @property
@@ -86,7 +94,7 @@ def connect_signals():
         post_delete_listener.connect()
 
 
-def model_dict(model):
+def model_dict(model: models.Model) -> dict:
     """
     Returns the model instance as a dict, nested values for related models.
     """
