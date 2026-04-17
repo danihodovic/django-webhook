@@ -19,3 +19,12 @@ class ModelWithFileField(models.Model):
     """
 
     file = models.FileField()
+
+
+class ModelWithCustomTopic(models.Model):
+    name = models.CharField(max_length=30)
+
+    def webhook_topics(self, action: str) -> list[str]:
+        return [
+            f"test.ModelWithCustomTopic/{action}/{self.name}",
+        ]

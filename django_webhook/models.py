@@ -11,7 +11,7 @@ from django_webhook.settings import get_settings
 
 from .validators import validate_topic_model
 
-topic_regex = r"\w+\.\w+\/[create|update|delete]"
+topic_regex = r"\w+\.\w+\/(create|update|delete)"
 
 STATES = [
     (states.PENDING, states.PENDING),
@@ -117,19 +117,17 @@ def populate_topics_from_settings():
     if not enabled_models:
         return
 
-    allowed_topics = set()
     for model in enabled_models:
-        model_allowed_topics = {
+        if hasattr(model, "webhook_topics"):
+            if not callable(getattr(model, "webhook_topics")):
+                logging.warning(
+                    f"Model {model} has a webhook_topics attribute but it's not callable. Skipping."
+                )
+                continue
+        default_topics = {
             f"{model}/{CREATE}",
             f"{model}/{UPDATE}",
             f"{model}/{DELETE}",
         }
-        allowed_topics.update(model_allowed_topics)
-
-    WebhookTopic.objects.exclude(name__in=allowed_topics).delete()
-    logging.info(f"Purging WebhookTopics: {allowed_topics}")
-
-    for topic in allowed_topics:
-        if not WebhookTopic.objects.filter(name=topic).exists():
-            WebhookTopic.objects.create(name=topic)
-            logging.info(f"Adding topic: {topic}")
+        for topic in default_topics:
+            WebhookTopic.objects.get_or_create(name=topic)

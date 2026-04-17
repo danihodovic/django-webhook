@@ -3,6 +3,7 @@ import hmac
 import json
 from datetime import datetime, timedelta
 
+from django_webhook.models import WebhookTopic
 import pytest
 from django.db.models.signals import post_save, post_delete
 from django.test import override_settings
@@ -17,8 +18,8 @@ from django_webhook.test_factories import (
 )
 from django_webhook.signals import SignalListener
 
-from tests.model_data import TEST_JOIN_DATE, TEST_LAST_ACTIVE, TEST_USER
-from tests.models import Country, User
+from tests.model_data import TEST_JOIN_DATE, TEST_LAST_ACTIVE, TEST_MODEL_WITH_CUSTOM_TOPIC, TEST_USER
+from tests.models import Country, User, ModelWithCustomTopic
 
 
 pytestmark = pytest.mark.django_db
@@ -109,6 +110,25 @@ def test_delete(responses):
     }
 
 
+def test_custom_topic(responses):
+    instance = ModelWithCustomTopic.objects.create(
+        name="Test",
+    )
+    webhook = WebhookFactory(
+        topics=[WebhookTopicFactory(name=instance.webhook_topics('update')[0])],
+    )
+    responses.post(webhook.url)
+    instance.save()
+    assert len(responses.calls) == 1
+    req = responses.calls[0].request
+    assert json.loads(req.body) == {
+        "topic": instance.webhook_topics('update')[0],
+        "object": TEST_MODEL_WITH_CUSTOM_TOPIC,
+        "object_type": "tests.ModelWithCustomTopic",
+        "webhook_uuid": str(webhook.uuid),
+    }
+
+
 def test_filters_topic_by_type(responses):
     webhook = WebhookFactory(
         topics=[WebhookTopicFactory(name="tests.User/update")],
@@ -193,6 +213,27 @@ def test_does_not_fire_inactive_webhooks(responses):
     assert len(responses.calls) == 0
 
 
+def test_cached_deleted_webhook_fails_gracefully(responses):
+    country = Country.objects.create(name="Yugoslavia")
+    webhook = WebhookFactory(
+        topics=[
+            WebhookTopicFactory(name="tests.Country/update"),
+        ],
+    )
+
+    now = datetime.now()
+    responses.post(webhook.url)
+    with freeze_time(now):
+        # First save call caches the query for webhooks
+        country.save()
+
+    # Delete the webhook re-trigger the signal and assert that it fails gracefully when it tries to fire a webhook that no longer exists
+    webhook.delete()
+    with freeze_time(now):
+        # Assert that the signal handler doesn't throw an error when it tries to fire a webhook that no longer exists
+        country.save()
+
+
 @override_settings(
     DJANGO_WEBHOOK=dict(
         MODELS=["tests.Country"],
@@ -233,3 +274,13 @@ def test_signal_listener_uid():
         ).uid
         == "django_webhook_tests.Country_post_delete"
     )
+
+
+def test_creates_custom_topics():
+    WebhookTopic.objects.all().delete()
+    model_with_custom_topic = ModelWithCustomTopic.objects.create(name="Test")
+    for topic in model_with_custom_topic.webhook_topics('create'):
+        assert WebhookTopic.objects.filter(name=topic).exists()
+    model_with_custom_topic.save()
+    for topic in model_with_custom_topic.webhook_topics('update'):
+        assert WebhookTopic.objects.filter(name=topic).exists()

@@ -29,7 +29,12 @@ def fire_webhook(
     topic=None,
     object_type=None,
 ):
-    webhook = Webhook.objects.get(id=webhook_id)
+    try:
+        webhook = Webhook.objects.get(id=webhook_id)
+    except Webhook.DoesNotExist:
+        logging.warning(f"Webhook with id {webhook_id} does not exist.")
+        return
+
     if not webhook.active:
         logging.warning(f"Webhook: {webhook} is inactive and I will not fire it.")
         return

@@ -7,7 +7,7 @@ RUN pip install --upgrade pip poetry
 
 COPY pyproject.toml poetry.lock /app/
 
-RUN poetry config virtualenvs.create false && poetry install --no-interaction
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-root
 
 COPY django_webhook /app/django_webhook
 COPY tests /app/tests

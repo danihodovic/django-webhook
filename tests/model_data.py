@@ -9,3 +9,7 @@ TEST_USER = {
     "join_date": "1970-01-01",
     "last_active": "2000-01-01T12:00:00",
 }
+TEST_MODEL_WITH_CUSTOM_TOPIC = {
+    "id": 1,
+    "name": "Test",
+}

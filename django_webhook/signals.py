@@ -1,17 +1,20 @@
 # pylint: disable=redefined-builtin
 import json
 from datetime import timedelta
+import logging
 
 from django.apps import apps
 from django.db import models
 from django.db.models.signals import ModelSignal, post_delete, post_save
 from django.forms import model_to_dict
 
-from django_webhook.models import Webhook
+from django_webhook.models import Webhook, WebhookTopic
 
 from .settings import get_settings
 from .tasks import fire_webhook
 from .util import cache
+
+logger = logging.getLogger(__name__)
 
 CREATE = "create"
 UPDATE = "update"
@@ -41,14 +44,21 @@ class SignalListener:
             case "post_delete":
                 action_type = DELETE
 
-        topic = f"{self.model_label}/{action_type}"
-        webhook_ids = _find_webhooks(topic)
+        topic_names = {f"{self.model_label}/{action_type}"}
+        if hasattr(instance, "webhook_topics") and callable(getattr(instance, "webhook_topics")):
+            instance_webhook_topics = instance.webhook_topics(action_type)
+            for topic in instance_webhook_topics:
+                WebhookTopic.objects.get_or_create(name=topic)
+                
+            topic_names = topic_names.union(set(instance_webhook_topics))
+        webhook_ids = _find_webhooks(frozenset(topic_names))
+        logger.info(f"Found {len(webhook_ids)} webhooks for topics: {topic_names}")
         encoder_cls = get_settings()["PAYLOAD_ENCODER_CLASS"]
 
-        for id, uuid in webhook_ids:
+        for id, uuid, topic_name in webhook_ids:
             payload_dict = dict(
                 object=model_dict(instance),
-                topic=topic,
+                topic=topic_name,
                 object_type=self.model_label,
                 webhook_uuid=str(uuid),
             )
@@ -56,7 +66,7 @@ class SignalListener:
             fire_webhook.delay(
                 id,
                 payload,
-                topic=topic,
+                topic=topic_name,
                 object_type=self.model_label,
             )
 
@@ -112,24 +122,24 @@ def _active_models():
     return model_classes
 
 
-def _find_webhooks(topic: str):
+def _find_webhooks(topic_names: list[str]):
     """
     In tests and for smaller setups we don't want to cache the query.
     """
     if get_settings()["USE_CACHE"]:
-        return _query_webhooks_cached(topic)
-    return _query_webhooks(topic)
+        return _query_webhooks_cached(topic_names)
+    return _query_webhooks(topic_names)
 
 
 @cache(ttl=timedelta(minutes=1))
-def _query_webhooks_cached(topic: str):
+def _query_webhooks_cached(topic_names: list[str]):
     """
     Cache the calls to the database so we're not polling the db anytime a signal is triggered.
     """
-    return _query_webhooks(topic)
+    return _query_webhooks(topic_names)
 
 
-def _query_webhooks(topic: str):
-    return Webhook.objects.filter(active=True, topics__name=topic).values_list(
-        "id", "uuid"
+def _query_webhooks(topic_names: list[str]):
+    return Webhook.objects.filter(active=True, topics__name__in=topic_names).values_list(
+        "id", "uuid", "topics__name"
     )

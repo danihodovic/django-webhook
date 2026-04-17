@@ -30,6 +30,9 @@ def test_populate_topics_from_settings(settings):
         "tests.Country/create",
         "tests.Country/delete",
         "tests.Country/update",
+        "tests.ModelWithCustomTopic/create",
+        "tests.ModelWithCustomTopic/delete",
+        "tests.ModelWithCustomTopic/update",
         "tests.ModelWithFileField/create",
         "tests.ModelWithFileField/delete",
         "tests.ModelWithFileField/update",
@@ -39,6 +42,7 @@ def test_populate_topics_from_settings(settings):
     ]
 
     settings.DJANGO_WEBHOOK["MODELS"] = ["tests.Country"]
+    WebhookTopic.objects.all().delete()
     populate_topics_from_settings()
     assert list(
         WebhookTopic.objects.values_list("name", flat=True).order_by("name")

@@ -9,11 +9,8 @@ def validate_topic_model(value: str):
     if not webhook_settings or not allowed_models:
         raise ValidationError("settings.DJANGO_WEBHOOK.MODELS is empty")
 
-    parts = value.split("/")
-    if len(parts) != 2:
-        raise ValidationError(f"Malformed topic: {value}")
-
-    [model_name, _] = value.split("/")
+    topic_name_tuple = value.split("/")
+    model_name = topic_name_tuple[0]
     if model_name not in allowed_models:
         raise ValidationError(
             f"The topic: {value} is not in the whitelisted settings: {allowed_models}"

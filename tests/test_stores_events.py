@@ -89,7 +89,7 @@ def test_clear_webhook_events():
 
     # Created now
     retained_event = WebhookEventFactory()
-    # Created two days ago
+    # Created five days ago
     older_event = WebhookEventFactory()
     WebhookEvent.objects.filter(id=older_event.id).update(
         created=now - timedelta(days=5)
